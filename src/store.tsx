@@ -45,29 +45,29 @@ export const {
     setDatastoreItemsAndCols
 } = mainSlice.actions;
 
-// export const fetchWorkspaces = () => async (dispatch: any) => 
-//     Hexabase.workspaces()
-//     .getWorkspacesAsync()
-//     .Result()
-//     .then(resp => 
-//     {
-//         dispatch(getWorkspaces(resp.workspaces));
-//     });
-
+// fetchWorkspaces get all available workspaces
 export const fetchWorkspaces = () => async (dispatch: any) => {
 
-    let resp = await Hexabase.workspaces()
-    .getWorkspacesAsync()
-    .ResultAsync<{workspaces: Array<any>}>();
-    dispatch(getWorkspaces(resp.workspaces));
+    let resp = await Hexabase
+                    .workspaces()
+                    .getWorkspacesAsync()
+                    .ResultAsync<{workspaces: Array<any>}>();
 
+    dispatch(getWorkspaces(resp.workspaces));
 }
+
+// setUserCurrentWorkspace
 export const setUserCurrentWorkspace = (currentWs: any) => async (dispatch: any) => {
     dispatch(setCurrentWorkspace(currentWs));
 }
 
+// fetchProjects get all projects by workspace id
 export const fetchProjects = (currentWs: any) => async (dispatch: any) => {
-    let applications = await Hexabase.applications().getApplications({ workspace_id: currentWs.workspace_id }).Result();
+    let applications = await Hexabase
+                            .applications()
+                            .getApplications({ workspace_id: currentWs.workspace_id })
+                            .ResultAsync<any>();
+
     dispatch(setProjects(applications));
 }
 
@@ -76,11 +76,13 @@ export const fetchDatastoreItems = (datastore: any, project_id: string) => async
     let items = await Hexabase.items().getItemsAsync({
         project_id: project_id,
         datastore_id: datastore.datastore_id,
-        per_page: 1, 
+        per_page: 10, 
         page: 1, 
         use_display_id: true        
     });
     var payload = {} as any;
+    console.log(items)
+    if(items.items.length === 0) return false;
     payload.cols = Object.keys(items.items[0]).filter(a => !exceptId.includes(a));
     payload.items = items.items;
     dispatch(setDatastoreItemsAndCols(payload))
